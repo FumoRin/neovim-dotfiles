@@ -7,9 +7,6 @@ vim.g.mapleader = " "
 -- For pasting into system clipboard
 vim.api.nvim_set_option("clipboard", "unnamedplus")
 
--- For creating a new terminal
-
-
 -- Terminal toggle function
 function _G.toggle_term()
   local term_buf = vim.g.term_buf
@@ -40,3 +37,22 @@ vim.keymap.set('n', '<C-\\>', toggle_term, { noremap = true, silent = true })
 
 -- Set Line Number
 vim.opt.relativenumber = true
+
+
+-- Update file if changed externally
+vim.opt.autoread = true
+
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  pattern = "*",
+  callback = function()
+    if vim.opt.autoread:get() and not vim.api.nvim_get_mode().mode:match("^[iR]") then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- Optional: Add a notification after file change
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  command = "echohl WarningMsg | echo \"File changed on disk. Buffer reloaded.\" | echohl None",
+})

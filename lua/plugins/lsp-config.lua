@@ -72,6 +72,10 @@ return {
         },
       })
 
+      lspconfig.ts_ls.setup({
+        capabilities = capabilities,
+      })
+
       -- Keymaps
       vim.keymap.set('n', 'H', vim.lsp.buf.hover, {})
       vim.keymap.set('n', '<C-j>', vim.lsp.buf.definition, {})
