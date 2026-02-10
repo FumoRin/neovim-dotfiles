@@ -36,8 +36,8 @@ return {
           -- confirm and accept autocomplete
           ['<CR>'] = cmp.mapping.confirm({ select = true }),
           -- Cursor movement for autocomplete
-          ['<C-a>'] = cmp.mapping.select_next_item(),
-          ['<C-s>'] = cmp.mapping.select_prev_item(),
+          ['<C-s>'] = cmp.mapping.select_next_item(),
+          ['<C-e>'] = cmp.mapping.select_prev_item(),
           -- 
         }),
         sources = cmp.config.sources({

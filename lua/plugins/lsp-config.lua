@@ -16,7 +16,7 @@ return {
     version = "1.29.0",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls" },
+        ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls"},
         automatic_installation = true,
         automatic_enable = true,
       })
@@ -32,6 +32,10 @@ return {
       local lspconfig = require("lspconfig")
 
       lspconfig.lua_ls.setup({
+        capabilities = capabilities
+      })
+
+      lspconfig.bashls.setup({
         capabilities = capabilities
       })
 

@@ -26,7 +26,9 @@ function _G.toggle_term()
   else
     -- Open a new terminal running PowerShell
     vim.cmd("belowright split")
-    vim.cmd("terminal powershell -NoLogo")
+    vim.cmd("terminal zsh")
+    -- below is for Windows Powershell
+    -- vim.cmd("terminal powershell -NoLogo")
     vim.g.term_buf = vim.api.nvim_get_current_buf()
     vim.g.term_win = vim.api.nvim_get_current_win()
   end
@@ -37,7 +39,7 @@ vim.keymap.set('n', '<C-\\>', toggle_term, { noremap = true, silent = true })
 
 -- Set Line Number
 vim.opt.relativenumber = true
-
+vim.opt.number = true
 
 -- Update file if changed externally
 vim.opt.autoread = true
@@ -56,3 +58,7 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
   pattern = "*",
   command = "echohl WarningMsg | echo \"File changed on disk. Buffer reloaded.\" | echohl None",
 })
+
+-- Color Correction for detecting white mode
+vim.opt.termguicolors = true
+
