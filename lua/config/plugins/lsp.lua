@@ -74,39 +74,40 @@ function M.setup_mason_lspconfig()
 end
 
 function M.setup_lspconfig()
+  local lspconfig = require("lspconfig")
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
-  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "tsserver" }
+  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls" }
 
-  vim.lsp.config("*", {
+  local default_config = {
     capabilities = capabilities,
-  })
-
-  vim.lsp.config("yamlls", {
-    settings = {
-      yaml = {
-        completion = true,
-        hover      = true,
-        validate   = true,
-        format     = { enable = true },
-        schemaStore = { enable = false },
-        -- Pre-assign the Kubernetes schema by glob so yamlls can serve
-        -- completions (apiVersion, kind, spec …) even on an empty new file.
-        schemas = {
-          [K8S_SCHEMA] = K8S_GLOBS,
-          ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = ".gitlab-ci.yml",
-          ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*.{yml,yaml}",
-          ["https://raw.githubusercontent.com/helm/chart-testing/main/schema/chart_schema.json"] = "*-Chart.yaml",
-          ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
-            "**/docker-compose*.yaml",
-            "**/docker-compose*.yml",
-          },
-        },
-      },
-    },
-  })
+  }
 
   for _, server in ipairs(servers) do
-    vim.lsp.enable(server)
+    if server == "yamlls" then
+      lspconfig.yamlls.setup(vim.tbl_deep_extend("force", default_config, {
+        settings = {
+          yaml = {
+            completion = true,
+            hover      = true,
+            validate   = true,
+            format     = { enable = true },
+            schemaStore = { enable = false },
+            schemas = {
+              [K8S_SCHEMA] = K8S_GLOBS,
+              ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = ".gitlab-ci.yml",
+              ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*.{yml,yaml}",
+              ["https://raw.githubusercontent.com/helm/chart-testing/main/schema/chart_schema.json"] = "*-Chart.yaml",
+              ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
+                "**/docker-compose*.yaml",
+                "**/docker-compose*.yml",
+              },
+            },
+          },
+        },
+      }))
+    else
+      lspconfig[server].setup(default_config)
+    end
   end
 
   -- ── LSP keymaps ──────────────────────────────────────────────────────────
@@ -115,9 +116,9 @@ function M.setup_lspconfig()
     group = lsp_keys,
     callback = function(args)
       local opts = { buffer = args.buf }
-      vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, opts)
-      vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, opts)
-      vim.keymap.set({ "n", "v" }, "<leader>lc", vim.lsp.buf.code_action, opts)
+      vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "LSP Hover" }))
+      vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "LSP Go to definition" }))
+      vim.keymap.set({ "n", "v" }, "<leader>lc", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "LSP Code Action" }))
     end,
   })
 

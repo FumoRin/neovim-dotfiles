@@ -33,7 +33,7 @@ function M.setup()
     sources = sources,
   })
 
-  vim.keymap.set("n", "<leader>fa", vim.lsp.buf.format, {})
+  vim.keymap.set("n", "<leader>fa", vim.lsp.buf.format, { desc = "Format code" })
 end
 
 return M

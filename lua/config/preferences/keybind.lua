@@ -19,15 +19,15 @@ function _G.toggle_term()
   else
     -- Open a new terminal running PowerShell
     vim.cmd("belowright split")
-    vim.cmd("terminal zsh")
+    -- vim.cmd("terminal zsh")
     -- below is for Windows Powershell
-    -- vim.cmd("terminal powershell -NoLogo")
+    vim.cmd("terminal powershell -NoLogo")
     vim.g.term_buf = vim.api.nvim_get_current_buf()
     vim.g.term_win = vim.api.nvim_get_current_win()
   end
 end
 
 -- Set keymap: Ctrl + \ to toggle terminal
-vim.keymap.set('n', '<C-\\>', toggle_term, { noremap = true, silent = true })
+vim.keymap.set('n', '<C-\\>', toggle_term, { noremap = true, silent = true, desc = "Toggle terminal" })
 
 

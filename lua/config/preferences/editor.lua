@@ -26,3 +26,4 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 -- Color Correction for detecting white mode
 vim.opt.termguicolors = true
 
+vim.opt.wrap = false

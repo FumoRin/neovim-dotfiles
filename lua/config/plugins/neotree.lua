@@ -1,7 +1,7 @@
 local M = {}
 
 function M.setup()
-  vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>")
+  vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
 
   require("neo-tree").setup({
     default_component_configs = {
