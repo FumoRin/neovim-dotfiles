@@ -67,47 +67,47 @@ end
 
 function M.setup_mason_lspconfig()
   require("mason-lspconfig").setup({
-    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls" },
+    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss" },
     automatic_installation = true,
     automatic_enable = false,
   })
 end
 
 function M.setup_lspconfig()
-  local lspconfig = require("lspconfig")
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
-  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls" }
+  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss" }
 
-  local default_config = {
+  -- Global capabilities for all servers
+  vim.lsp.config("*", {
     capabilities = capabilities,
-  }
+  })
 
-  for _, server in ipairs(servers) do
-    if server == "yamlls" then
-      lspconfig.yamlls.setup(vim.tbl_deep_extend("force", default_config, {
-        settings = {
-          yaml = {
-            completion = true,
-            hover      = true,
-            validate   = true,
-            format     = { enable = true },
-            schemaStore = { enable = false },
-            schemas = {
-              [K8S_SCHEMA] = K8S_GLOBS,
-              ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = ".gitlab-ci.yml",
-              ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*.{yml,yaml}",
-              ["https://raw.githubusercontent.com/helm/chart-testing/main/schema/chart_schema.json"] = "*-Chart.yaml",
-              ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
-                "**/docker-compose*.yaml",
-                "**/docker-compose*.yml",
-              },
-            },
+  -- Specific config for yamlls
+  vim.lsp.config("yamlls", {
+    settings = {
+      yaml = {
+        completion = true,
+        hover      = true,
+        validate   = true,
+        format     = { enable = true },
+        schemaStore = { enable = false },
+        schemas = {
+          [K8S_SCHEMA] = K8S_GLOBS,
+          ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = ".gitlab-ci.yml",
+          ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*.{yml,yaml}",
+          ["https://raw.githubusercontent.com/helm/chart-testing/main/schema/chart_schema.json"] = "*-Chart.yaml",
+          ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
+            "**/docker-compose*.yaml",
+            "**/docker-compose*.yml",
           },
         },
-      }))
-    else
-      lspconfig[server].setup(default_config)
-    end
+      },
+    },
+  })
+
+  -- Enable servers using the native API
+  for _, server in ipairs(servers) do
+    vim.lsp.enable(server)
   end
 
   -- ── LSP keymaps ──────────────────────────────────────────────────────────

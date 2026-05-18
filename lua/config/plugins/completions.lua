@@ -3,6 +3,7 @@ local M = {}
 function M.setup_cmp()
   local cmp = require("cmp")
   local luasnip = require("luasnip")
+  local lspkind = require("lspkind")
 
   require("luasnip.loaders.from_vscode").lazy_load()
 
@@ -18,43 +19,49 @@ function M.setup_cmp()
       documentation = cmp.config.window.bordered(),
     },
 
-    mapping = cmp.mapping.preset.insert({
+    -- Visual improvements
+    formatting = {
+      format = lspkind.cmp_format({
+        mode = "symbol_text",
+        maxwidth = 50,
+        ellipsis_char = "...",
+        menu = {
+          nvim_lsp = "[LSP]",
+          luasnip  = "[Snippet]",
+          buffer   = "[Buffer]",
+          path     = "[Path]",
+        },
+      }),
+    },
 
-      -- Scroll documentation
+    experimental = {
+      ghost_text = true,
+    },
+
+    mapping = cmp.mapping.preset.insert({
       ["<C-b>"] = cmp.mapping.scroll_docs(-4),
       ["<C-f>"] = cmp.mapping.scroll_docs(4),
-
-      -- Manually trigger completion
       ["<C-Space>"] = cmp.mapping.complete(),
-
-      -- Abort completion
       ["<C-e>"] = cmp.mapping.abort(),
 
-      -- Navigate completion items (Vim standard)
-      ["<C-n>"] = cmp.mapping.select_next_item(),
-      ["<C-p>"] = cmp.mapping.select_prev_item(),
+      -- Explicitly select with Enter
+      ["<CR>"] = cmp.mapping.confirm({ select = false }),
 
-      -- Confirm selection
-      ["<CR>"] = cmp.mapping.confirm({
-        select = false, -- safer: don't auto-accept first item
-      }),
-
-      -- TAB behavior (completion + snippets + fallback)
+      -- Super-Tab: Navigate menu OR jump snippets OR fallback to Tab
       ["<Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item()
-        elseif luasnip.expand_or_jumpable() then
+        elseif luasnip.expand_or_locally_jumpable() then
           luasnip.expand_or_jump()
         else
           fallback()
         end
       end, { "i", "s" }),
 
-      -- SHIFT + TAB (reverse)
       ["<S-Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_prev_item()
-        elseif luasnip.jumpable(-1) then
+        elseif luasnip.locally_jumpable(-1) then
           luasnip.jump(-1)
         else
           fallback()
@@ -65,6 +72,7 @@ function M.setup_cmp()
     sources = cmp.config.sources({
       { name = "nvim_lsp" },
       { name = "luasnip" },
+      { name = "path" },
     }, {
       { name = "buffer" },
     }),
