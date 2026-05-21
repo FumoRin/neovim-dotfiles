@@ -18,7 +18,7 @@ function M.setup()
       highlight = "IblScope",
     },
     exclude = {
-      filetypes = { "dashboard", "help", "neotree", "Trouble", "lazy", "mason" },
+      filetypes = { "dashboard", "help", "markdown", "neotree", "Trouble", "lazy", "mason" },
       buftypes = { "terminal", "nofile" },
     },
   })

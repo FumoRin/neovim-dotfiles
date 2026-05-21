@@ -1,54 +1,69 @@
 local M = {}
 
+local parsers = {
+  "bash",
+  "css",
+  "dockerfile",
+  "html",
+  "javascript",
+  "json",
+  "markdown",
+  "markdown_inline",
+  "tsx",
+  "typescript",
+  "yaml",
+}
+
+local filetypes = {
+  "bash",
+  "css",
+  "dockerfile",
+  "html",
+  "javascript",
+  "javascriptreact",
+  "json",
+  "typescript",
+  "typescriptreact",
+  "yaml",
+}
+
 function M.setup()
   local treesitter = require("nvim-treesitter")
-  local languages = {
-    "bash",
-    "css",
-    "dockerfile",
-    "html",
-    "javascript",
-    "json",
-    "markdown",
-    "markdown_inline",
-    "tsx",
-    "typescript",
-    "yaml",
-  }
-
-  if not treesitter.install then
-    require("nvim-treesitter.configs").setup({
-      ensure_installed = languages,
-      highlight = { enable = true },
-    })
-    return
-  end
 
   treesitter.setup()
 
-  local missing = vim.tbl_filter(function(lang)
-    return #vim.api.nvim_get_runtime_file("parser/" .. lang .. ".*", false) == 0
-  end, languages)
-
-  if #missing > 0 then
-    treesitter.install(missing)
+  local installed = {}
+  for _, parser in ipairs(treesitter.get_installed("parsers")) do
+    installed[parser] = true
   end
 
-  local filetypes = {}
-  for _, lang in ipairs(languages) do
-    for _, filetype in ipairs(vim.treesitter.language.get_filetypes(lang)) do
-      table.insert(filetypes, filetype)
+  local missing = {}
+  for _, parser in ipairs(parsers) do
+    if not installed[parser] then
+      table.insert(missing, parser)
     end
   end
 
+  if #missing > 0 then
+    if vim.fn.executable("tree-sitter") == 0 then
+      vim.notify(
+        "Treesitter parsers missing; install tree-sitter CLI, then run :TSInstall " .. table.concat(missing, " "),
+        vim.log.levels.WARN
+      )
+    else
+      local ok, err = pcall(treesitter.install, missing, { summary = true })
+      if not ok then
+        vim.notify("Treesitter parser install failed: " .. tostring(err), vim.log.levels.WARN)
+      end
+    end
+  end
+
+  local group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
   vim.api.nvim_create_autocmd("FileType", {
+    group = group,
     pattern = filetypes,
     callback = function(args)
       pcall(vim.treesitter.start, args.buf)
-
-      if vim.bo[args.buf].filetype ~= "markdown" then
-        vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-      end
     end,
   })
 end
