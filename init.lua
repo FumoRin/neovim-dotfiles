@@ -15,11 +15,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Neovim 0.12 compatibility shims
-if vim.treesitter.language.get_lang and not vim.treesitter.language.ft_to_lang then
-  vim.treesitter.language.ft_to_lang = vim.treesitter.language.get_lang
-end
-
 local opts = {
 
 }

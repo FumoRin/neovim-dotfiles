@@ -67,7 +67,7 @@ end
 
 function M.setup_mason_lspconfig()
   require("mason-lspconfig").setup({
-    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss" },
+    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss", "ansiblels", "gopls" },
     automatic_installation = true,
     automatic_enable = false,
   })
@@ -75,7 +75,7 @@ end
 
 function M.setup_lspconfig()
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
-  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss" }
+  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss", "ansiblels", "gopls" }
 
   -- Global capabilities for all servers
   vim.lsp.config("*", {

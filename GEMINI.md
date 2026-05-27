@@ -128,24 +128,22 @@ return {
 Lazy auto-discovers all `.lua` files in `lua/plugins/`.
 
 ### Adding a new LSP server
-1. Open Mason (`:Mason`) and install the server, **or** add it to the `ensure_installed` list in the mason-lspconfig spec.
-2. Add server-specific settings (if needed) to the lspconfig plugin file using the `servers` table pattern already in place.
-3. For JSON/YAML servers, wire in `schemastore` via `require("schemastore").json.schemas()` / `.yaml.schemas()`.
+1. Open Mason (`:Mason`) and install the server.
+2. Add the server name to the `ensure_installed` list in `lua/config/plugins/lsp.lua` (inside `M.setup_mason_lspconfig`).
+3. Add the server name to the `servers` list in `lua/config/plugins/lsp.lua` (inside `M.setup_lspconfig`).
+4. If the server requires custom settings, use `vim.lsp.config("<server_name>", { settings = { ... } })` in `M.setup_lspconfig`.
 
 ### Adding a formatter or linter (null-ls)
-Register new sources in the none-ls plugin spec:
+Register new sources in `lua/config/plugins/null_ls.lua`:
 
 ```lua
-local null_ls = require("null-ls")
-null_ls.setup({
-  sources = {
-    null_ls.builtins.formatting.prettier,
-    null_ls.builtins.diagnostics.eslint_d,
-    -- none-ls-extras sources:
-    require("none-ls.diagnostics.eslint"),
-  },
-})
+local sources = {
+  null_ls.builtins.formatting.prettier,
+  null_ls.builtins.diagnostics.ansiblelint,
+  -- ...
+}
 ```
+Check the [none-ls builtins](https://github.com/nvimtools/none-ls.nvim/blob/main/doc/BUILTINS.md) for available names.
 
 ### Keymaps
 Keymaps are co-located with the plugin that owns them (inside the plugin's `config` or `keys` lazy field). Do **not** create a separate global keymap file unless there is a compelling reason — discoverability matters.
@@ -167,8 +165,26 @@ Use this to track progress toward full IDE parity:
 - [x] Syntax highlighting (Treesitter)
 - [x] Indent guides
 - [x] Integrated terminal (e.g. `toggleterm.nvim`)
+- [x] Advanced Folding (nvim-ufo)
 - [ ] Breadcrumb / winbar showing current symbol
 - [ ] Session management (e.g. `persistence.nvim`)
+
+---
+
+## Key Keymaps
+
+### Folding (nvim-ufo)
+| Key | Action | Scope |
+|-----|--------|-------|
+| `za` | Toggle fold | Current level |
+| `zA` | Toggle fold recursive | Current + all children |
+| `zc` / `zo` | Close / Open fold | Current level |
+| `zC` / `zO` | Close / Open recursive | Current + all children |
+| `zM` | Close all folds | Buffer-wide |
+| `zR` | Open all folds | Buffer-wide |
+| `zm` | Fold more | Incremental level |
+| `zr` | Fold less | Incremental level |
+| `K`  | Peek fold | Preview content without opening |
 
 ---
 

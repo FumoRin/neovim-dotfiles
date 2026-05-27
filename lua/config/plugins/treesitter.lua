@@ -7,10 +7,14 @@ local parsers = {
   "html",
   "javascript",
   "json",
+  "lua",
   "markdown",
   "markdown_inline",
+  "query",
   "tsx",
   "typescript",
+  "vim",
+  "vimdoc",
   "yaml",
 }
 
@@ -22,15 +26,20 @@ local filetypes = {
   "javascript",
   "javascriptreact",
   "json",
+  "lua",
   "typescript",
   "typescriptreact",
   "yaml",
+  "yaml.ansible",
 }
 
 function M.setup()
   local treesitter = require("nvim-treesitter")
 
   treesitter.setup()
+
+  -- Register yaml.ansible to use the yaml parser
+  vim.treesitter.language.register("yaml", "yaml.ansible")
 
   local installed = {}
   for _, parser in ipairs(treesitter.get_installed("parsers")) do
@@ -45,16 +54,9 @@ function M.setup()
   end
 
   if #missing > 0 then
-    if vim.fn.executable("tree-sitter") == 0 then
-      vim.notify(
-        "Treesitter parsers missing; install tree-sitter CLI, then run :TSInstall " .. table.concat(missing, " "),
-        vim.log.levels.WARN
-      )
-    else
-      local ok, err = pcall(treesitter.install, missing, { summary = true })
-      if not ok then
-        vim.notify("Treesitter parser install failed: " .. tostring(err), vim.log.levels.WARN)
-      end
+    local ok, task = pcall(treesitter.install, missing, { summary = true })
+    if not ok then
+      vim.notify("Treesitter parser install failed: " .. tostring(task), vim.log.levels.WARN)
     end
   end
 

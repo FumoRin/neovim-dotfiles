@@ -8,6 +8,12 @@ function M.setup()
     null_ls.builtins.formatting.black,
     null_ls.builtins.formatting.isort,
     null_ls.builtins.formatting.shfmt,
+    null_ls.builtins.formatting.gofumpt,
+    null_ls.builtins.formatting.goimports,
+    null_ls.builtins.diagnostics.golangci_lint,
+    null_ls.builtins.diagnostics.ansiblelint.with({
+      filetypes = { "yaml.ansible" },
+    }),
     require("none-ls-shellcheck.diagnostics"),
     require("none-ls-shellcheck.code_actions"),
   }
