@@ -46,8 +46,8 @@ local K8S_GLOBS = {
   "*rbac*.yml",
   "*clusterrole*.yaml",
   "*clusterrole*.yml",
-  "*serviceaccount*.yaml",
   "*serviceaccount*.yml",
+  "*serviceaccount*.yaml",
   "*hpa*.yaml",        -- HorizontalPodAutoscaler
   "*hpa*.yml",
   "*pvc*.yaml",        -- PersistentVolumeClaim
@@ -110,15 +110,45 @@ function M.setup_lspconfig()
     vim.lsp.enable(server)
   end
 
+  -- ── Diagnostic Configuration ─────────────────────────────────────────────
+  vim.diagnostic.config({
+    update_in_insert = true, -- Update diagnostics while typing
+    severity_sort = true,
+    float = {
+      focusable = false,
+      style = "minimal",
+      border = "rounded",
+      source = "always",
+      header = "",
+      prefix = "",
+    },
+  })
+
   -- ── LSP keymaps ──────────────────────────────────────────────────────────
   local lsp_keys = vim.api.nvim_create_augroup("UserLspKeymaps", { clear = true })
   vim.api.nvim_create_autocmd("LspAttach", {
     group = lsp_keys,
     callback = function(args)
       local opts = { buffer = args.buf }
+      local builtin = require("telescope.builtin")
+
       vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "LSP Hover" }))
-      vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "LSP Go to definition" }))
       vim.keymap.set({ "n", "v" }, "<leader>lc", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "LSP Code Action" }))
+      vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "LSP Rename" }))
+
+      -- Navigation
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+      vim.keymap.set("n", "gr", builtin.lsp_references, vim.tbl_extend("force", opts, { desc = "Go to references" }))
+      vim.keymap.set("n", "gi", builtin.lsp_implementations, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
+      vim.keymap.set("n", "gt", builtin.lsp_type_definitions, vim.tbl_extend("force", opts, { desc = "Go to type definition" }))
+      vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "LSP Go to definition" }))
+      vim.keymap.set("n", "<leader>lb", "<C-o>", vim.tbl_extend("force", opts, { desc = "Go back (Jump list)" }))
+
+      -- Diagnostic navigation
+      vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Go to previous diagnostic" }))
+      vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" }))
+      vim.keymap.set("n", "<leader>le", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Show diagnostic error" }))
+      vim.keymap.set("n", "<leader>lq", vim.diagnostic.setloclist, vim.tbl_extend("force", opts, { desc = "Open diagnostic list" }))
     end,
   })
 

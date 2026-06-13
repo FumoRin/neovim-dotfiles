@@ -186,6 +186,27 @@ Use this to track progress toward full IDE parity:
 | `zr` | Fold less | Incremental level |
 | `K`  | Peek fold | Preview content without opening |
 
+### Diagnostics
+| Key | Action | Scope |
+|-----|--------|-------|
+| `[d` | Previous diagnostic | Buffer |
+| `]d` | Next diagnostic | Buffer |
+| `<leader>le` | Show diagnostic float | Line |
+| `<leader>lq` | Open diagnostic list (loclist) | Buffer |
+| `<leader>lD` | Search diagnostics (Telescope) | Workspace |
+
+### LSP Navigation & Symbols
+| Key | Action | Scope |
+|-----|--------|-------|
+| `gd` | Go to definition | Symbol |
+| `gr` | Go to references | Symbol |
+| `gi` | Go to implementation | Symbol |
+| `gt` | Go to type definition | Symbol |
+| `<leader>lb` | Go back to previous location | Global |
+| `<leader>lr` | Rename symbol | Symbol |
+| `<leader>lh` | Hover documentation | Symbol |
+| `<leader>lc` | Code actions | Line/Selection |
+
 ---
 
 ## Key Dependencies Between Plugins

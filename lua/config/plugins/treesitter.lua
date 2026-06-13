@@ -18,55 +18,30 @@ local parsers = {
   "yaml",
 }
 
-local filetypes = {
-  "bash",
-  "css",
-  "dockerfile",
-  "html",
-  "javascript",
-  "javascriptreact",
-  "json",
-  "lua",
-  "typescript",
-  "typescriptreact",
-  "yaml",
-  "yaml.ansible",
-}
-
 function M.setup()
   local treesitter = require("nvim-treesitter")
 
   treesitter.setup()
 
+  -- LSP hover buffers are rendered as Markdown. With some AppImage/runtime +
+  -- nvim-treesitter combinations, Markdown injections can crash in the
+  -- set-lang-from-info-string! directive and leave highlighting broken.
+  vim.treesitter.query.set("markdown", "injections", "")
+
   -- Register yaml.ansible to use the yaml parser
   vim.treesitter.language.register("yaml", "yaml.ansible")
 
-  local installed = {}
-  for _, parser in ipairs(treesitter.get_installed("parsers")) do
-    installed[parser] = true
-  end
-
-  local missing = {}
-  for _, parser in ipairs(parsers) do
-    if not installed[parser] then
-      table.insert(missing, parser)
-    end
-  end
-
-  if #missing > 0 then
-    local ok, task = pcall(treesitter.install, missing, { summary = true })
-    if not ok then
-      vim.notify("Treesitter parser install failed: " .. tostring(task), vim.log.levels.WARN)
-    end
-  end
-
-  local group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
-  vim.api.nvim_create_autocmd("FileType", {
-    group = group,
-    pattern = filetypes,
-    callback = function(args)
-      pcall(vim.treesitter.start, args.buf)
-    end,
+  require("nvim-treesitter.configs").setup({
+    ensure_installed = parsers,
+    sync_install = false,
+    auto_install = true,
+    highlight = {
+      enable = true,
+      disable = { "markdown" },
+    },
+    indent = {
+      enable = true,
+    },
   })
 end
 
