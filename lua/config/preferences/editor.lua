@@ -7,6 +7,9 @@ vim.cmd("set shiftwidth=2")
 vim.opt.relativenumber = true
 vim.opt.number = true
 
+-- Disable showmode
+vim.opt.showmode = false
+
 -- Update file if changed externally
 vim.opt.autoread = true
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
