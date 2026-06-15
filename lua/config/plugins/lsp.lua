@@ -132,7 +132,9 @@ function M.setup_lspconfig()
       local opts = { buffer = args.buf }
       local builtin = require("telescope.builtin")
 
-      vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "LSP Hover" }))
+      vim.keymap.set("n", "<leader>lh", function()
+        vim.lsp.buf.hover({ border = "rounded" })
+      end, vim.tbl_extend("force", opts, { desc = "LSP Hover" }))
       vim.keymap.set({ "n", "v" }, "<leader>lc", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "LSP Code Action" }))
       vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "LSP Rename" }))
 

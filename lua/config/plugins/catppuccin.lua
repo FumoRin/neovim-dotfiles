@@ -5,6 +5,7 @@ function M.setup()
     flavour = "mocha",
     transparent_background = false,
     integrations = {
+      cmp = true,
       indent_blankline = {
         enabled = true,
         scope_color = "mauve", -- This sets the IblScope color
