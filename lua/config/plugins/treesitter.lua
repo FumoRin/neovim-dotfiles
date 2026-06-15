@@ -21,12 +21,7 @@ local parsers = {
 function M.setup()
   local treesitter = require("nvim-treesitter")
 
-  treesitter.setup()
-
-  -- LSP hover buffers are rendered as Markdown. With some AppImage/runtime +
-  -- nvim-treesitter combinations, Markdown injections can crash in the
-  -- set-lang-from-info-string! directive and leave highlighting broken.
-  vim.treesitter.query.set("markdown", "injections", "")
+  -- treesitter.setup()
 
   -- Register yaml.ansible to use the yaml parser
   vim.treesitter.language.register("yaml", "yaml.ansible")
@@ -37,7 +32,7 @@ function M.setup()
     auto_install = true,
     highlight = {
       enable = true,
-      disable = { "markdown" },
+      -- disable = { "markdown" },
     },
     indent = {
       enable = true,
