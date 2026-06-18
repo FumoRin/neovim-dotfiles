@@ -2,6 +2,10 @@ local M = {}
 
 function M.setup()
   require("render-markdown").setup({
+    file_types = { "markdown" },
+    ignore = function(buf)
+      return vim.bo[buf].buftype == "nofile"
+    end,
     heading = {
       enabled = true,
       sign = true,

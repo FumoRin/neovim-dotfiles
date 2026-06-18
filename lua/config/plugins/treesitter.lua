@@ -18,6 +18,11 @@ local parsers = {
   "yaml",
 }
 
+local function is_markdown_float(buf)
+  local filetype = vim.bo[buf].filetype
+  return vim.bo[buf].buftype == "nofile" and (filetype == "markdown" or filetype == "markdown.inline")
+end
+
 function M.setup()
   local treesitter = require("nvim-treesitter")
 
@@ -32,10 +37,15 @@ function M.setup()
     auto_install = true,
     highlight = {
       enable = true,
-      -- disable = { "markdown" },
+      disable = function(lang, buf)
+        return (lang == "markdown" or lang == "markdown_inline") and is_markdown_float(buf)
+      end,
     },
     indent = {
       enable = true,
+      disable = function(lang, buf)
+        return (lang == "markdown" or lang == "markdown_inline") and is_markdown_float(buf)
+      end,
     },
   })
 end

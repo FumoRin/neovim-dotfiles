@@ -4,7 +4,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     "nvim-tree/nvim-web-devicons",
   },
-  ft = { "markdown", "markdown.inline" },
+  ft = { "markdown" },
   config = function()
     require("config.plugins.render_markdown").setup()
   end,
