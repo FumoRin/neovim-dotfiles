@@ -207,7 +207,18 @@ Use this to track progress toward full IDE parity:
 | `<leader>lh` | Hover documentation | Symbol |
 | `<leader>lc` | Code actions | Line/Selection |
 
+### Git (gitsigns.nvim)
+| Key | Action | Scope |
+|-----|--------|-------|
+| `[h` / `]h` | Previous / Next git hunk | Buffer |
+| `<leader>ha` | Reset git hunk to HEAD | Line / Selection |
+| `<leader>hA` | Reset buffer to HEAD | Buffer |
+| `<leader>hp` | Preview git hunk | Line |
+| `<leader>hb` | Git blame line popup | Line |
+| `<leader>tb` | Toggle inline git blame | Buffer |
+
 ---
+
 
 ## Key Dependencies Between Plugins
 
