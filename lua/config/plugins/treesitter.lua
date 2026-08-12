@@ -1,9 +1,13 @@
 local M = {}
 
-local parsers = {
+M.parsers = {
   "bash",
   "css",
   "dockerfile",
+  "go",
+  "gomod",
+  "gosum",
+  "gowork",
   "html",
   "javascript",
   "json",
@@ -18,6 +22,30 @@ local parsers = {
   "yaml",
 }
 
+local filetypes = {
+  "bash",
+  "css",
+  "dockerfile",
+  "go",
+  "gomod",
+  "gosum",
+  "gowork",
+  "html",
+  "javascript",
+  "javascriptreact",
+  "json",
+  "lua",
+  "markdown",
+  "sh",
+  "tsx",
+  "typescript",
+  "typescriptreact",
+  "vim",
+  "vimdoc",
+  "yaml",
+  "yaml.ansible",
+}
+
 local function is_markdown_float(buf)
   local filetype = vim.bo[buf].filetype
   return vim.bo[buf].buftype == "nofile" and (filetype == "markdown" or filetype == "markdown.inline")
@@ -26,27 +54,28 @@ end
 function M.setup()
   local treesitter = require("nvim-treesitter")
 
-  -- treesitter.setup()
-
   -- Register yaml.ansible to use the yaml parser
   vim.treesitter.language.register("yaml", "yaml.ansible")
+  vim.treesitter.language.register("bash", "sh")
+  vim.treesitter.language.register("tsx", "typescriptreact")
+  vim.treesitter.language.register("javascript", "javascriptreact")
 
-  require("nvim-treesitter.configs").setup({
-    ensure_installed = parsers,
-    sync_install = false,
-    auto_install = true,
-    highlight = {
-      enable = true,
-      disable = function(lang, buf)
-        return (lang == "markdown" or lang == "markdown_inline") and is_markdown_float(buf)
-      end,
-    },
-    indent = {
-      enable = true,
-      disable = function(lang, buf)
-        return (lang == "markdown" or lang == "markdown_inline") and is_markdown_float(buf)
-      end,
-    },
+  treesitter.setup({
+    install_dir = vim.fn.stdpath("data") .. "/site",
+  })
+
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = filetypes,
+    group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true }),
+    callback = function(args)
+      if is_markdown_float(args.buf) then
+        return
+      end
+
+      if pcall(vim.treesitter.start, args.buf) then
+        vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end
+    end,
   })
 end
 

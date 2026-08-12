@@ -67,7 +67,7 @@ end
 
 function M.setup_mason_lspconfig()
   require("mason-lspconfig").setup({
-    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss", "ansiblels", "gopls" },
+    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls"},
     automatic_installation = true,
     automatic_enable = false,
   })
@@ -75,7 +75,17 @@ end
 
 function M.setup_lspconfig()
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
-  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss", "ansiblels", "gopls" }
+  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls"}
+
+  if vim.lsp.handlers and vim.lsp.handlers.hover then
+    local hover_handler = vim.lsp.handlers.hover
+    vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
+      config = vim.tbl_deep_extend("force", config or {}, {
+        border = "rounded",
+      })
+      return hover_handler(err, result, ctx, config)
+    end
+  end
 
   -- Global capabilities for all servers
   vim.lsp.config("*", {
@@ -101,6 +111,16 @@ function M.setup_lspconfig()
             "**/docker-compose*.yml",
           },
         },
+      },
+    },
+  })
+
+  -- astro-language-server needs an explicit TypeScript SDK location. Mason
+  -- installs it alongside typescript-language-server.
+  vim.lsp.config("astro", {
+    init_options = {
+      typescript = {
+        tsdk = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/typescript/lib",
       },
     },
   })

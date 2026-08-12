@@ -27,7 +27,13 @@ function _G.toggle_term()
   end
 end
 
--- Set keymap: Ctrl + \ to toggle terminal
+-- Set keymap: Ctrl + \\ to toggle terminal
 vim.keymap.set('n', '<C-\\>', toggle_term, { noremap = true, silent = true, desc = "Toggle terminal" })
 
+-- Toggle line wrap
+vim.keymap.set('n', '<leader>w', function()
+  vim.wo.wrap = not vim.wo.wrap
+end, { noremap = true, silent = true, desc = "Toggle wrap" })
 
+-- Switch to alternate / previous buffer
+vim.keymap.set('n', '<leader><tab>', '<C-^>', { noremap = true, silent = true, desc = "Switch to alternate buffer" })
