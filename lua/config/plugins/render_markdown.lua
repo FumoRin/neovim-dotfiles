@@ -42,6 +42,13 @@ function M.setup()
       unchecked = { icon = "󰄱 " },
       checked = { icon = "󰄲 " },
     },
+    latex = {
+      enabled = true,
+      converter = { "utftex", "latex2text" },
+      highlight = "RenderMarkdownMath",
+      top_pad = 0,
+      bottom_pad = 0,
+    },
   })
 end
 

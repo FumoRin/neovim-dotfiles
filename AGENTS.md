@@ -99,6 +99,12 @@ Turn Neovim into a full IDE experience comparable to VS Code or JetBrains IDEs, 
 |--------|---------|
 | `windwp/nvim-autopairs` | Auto-close brackets, quotes, etc. |
 
+### Markdown & Media
+| Plugin | Purpose |
+|--------|---------|
+| `MeanderingProgrammer/render-markdown.nvim` | In-buffer markdown styling (headings, tables, callouts, checkboxes, unicode math) |
+| `folke/snacks.nvim` | Terminal graphics image viewer, Mermaid diagram rendering, and LaTeX math rendering |
+
 ### Dependencies / Utilities
 | Plugin | Purpose |
 |--------|---------|
@@ -166,12 +172,20 @@ Use this to track progress toward full IDE parity:
 - [x] Indent guides
 - [x] Integrated terminal (e.g. `toggleterm.nvim`)
 - [x] Advanced Folding (nvim-ufo)
+- [x] Markdown document rendering (render-markdown.nvim)
+- [x] Inline images, Mermaid diagrams & math rendering (snacks.nvim)
 - [ ] Breadcrumb / winbar showing current symbol
 - [ ] Session management (e.g. `persistence.nvim`)
 
 ---
 
 ## Key Keymaps
+
+### Markdown & Images
+| Key | Action | Scope |
+|-----|--------|-------|
+| `<leader>mr` | Toggle Markdown render | Buffer |
+| `<leader>mi` | Hover/Preview image under cursor | Buffer |
 
 ### Folding (nvim-ufo)
 | Key | Action | Scope |
