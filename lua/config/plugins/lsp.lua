@@ -77,19 +77,53 @@ function M.setup_lspconfig()
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
   local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls"}
 
-  if vim.lsp.handlers and vim.lsp.handlers.hover then
-    local hover_handler = vim.lsp.handlers.hover
-    vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
-      config = vim.tbl_deep_extend("force", config or {}, {
-        border = "rounded",
-      })
-      return hover_handler(err, result, ctx, config)
+  if vim.lsp.handlers then
+    if vim.lsp.handlers.hover then
+      local hover_handler = vim.lsp.handlers.hover
+      vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
+        config = vim.tbl_deep_extend("force", config or {}, {
+          border = "rounded",
+        })
+        return hover_handler(err, result, ctx, config)
+      end
+    end
+
+    if vim.lsp.handlers.signature_help then
+      local sig_handler = vim.lsp.handlers.signature_help
+      vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
+        config = vim.tbl_deep_extend("force", config or {}, {
+          border = "rounded",
+        })
+        return sig_handler(err, result, ctx, config)
+      end
     end
   end
 
   -- Global capabilities for all servers
   vim.lsp.config("*", {
     capabilities = capabilities,
+  })
+
+  -- Specific config for gopls
+  vim.lsp.config("gopls", {
+    settings = {
+      gopls = {
+        usePlaceholders = true,
+        analyses = {
+          unusedparams = true,
+        },
+        staticcheck = true,
+        hints = {
+          assignVariableTypes = true,
+          compositeLiteralFields = true,
+          compositeLiteralTypes = true,
+          constantValues = true,
+          functionTypeParameters = true,
+          parameterNames = true,
+          rangeVariableTypes = true,
+        },
+      },
+    },
   })
 
   -- Specific config for yamlls
@@ -155,6 +189,9 @@ function M.setup_lspconfig()
       vim.keymap.set("n", "<leader>lh", function()
         vim.lsp.buf.hover({ border = "rounded" })
       end, vim.tbl_extend("force", opts, { desc = "LSP Hover" }))
+      vim.keymap.set("n", "<leader>ls", function()
+        vim.lsp.buf.signature_help({ border = "rounded" })
+      end, vim.tbl_extend("force", opts, { desc = "LSP Signature Help" }))
       vim.keymap.set({ "n", "v" }, "<leader>lc", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "LSP Code Action" }))
       vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "LSP Rename" }))
 

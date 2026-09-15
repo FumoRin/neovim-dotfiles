@@ -50,6 +50,7 @@ Turn Neovim into a full IDE experience comparable to VS Code or JetBrains IDEs, 
 | `williamboman/mason.nvim` | GUI installer for LSP servers, linters, and formatters |
 | `williamboman/mason-lspconfig.nvim` | Bridges mason ↔ lspconfig so installed servers auto-attach |
 | `b0o/schemastore.nvim` | JSON/YAML schema catalogue fed into jsonls/yamlls for validation |
+| `ray-x/lsp_signature.nvim` | Function signature popup and active parameter highlighting as you type |
 
 ### Completion
 | Plugin | Purpose |
@@ -219,6 +220,8 @@ Use this to track progress toward full IDE parity:
 | `<leader>lb` | Go back to previous location | Global |
 | `<leader>lr` | Rename symbol | Symbol |
 | `<leader>lh` | Hover documentation | Symbol |
+| `<leader>ls` | Signature help documentation | Symbol / Call |
+| `<C-k>` | Toggle signature help float (Insert mode) | Insert |
 | `<leader>lc` | Code actions | Line/Selection |
 
 ### Git (gitsigns.nvim)
