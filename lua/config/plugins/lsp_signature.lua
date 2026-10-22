@@ -4,7 +4,7 @@ function M.setup()
   require("lsp_signature").setup({
     bind = true,
     doc_lines = 4,
-    floating_window = true,
+    floating_window = false, -- Disable automatic popup; use virtual text and press <C-k> on demand
     floating_window_above_cur_line = true,
     fix_pos = false,
     hint_enable = true,
