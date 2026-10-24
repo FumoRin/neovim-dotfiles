@@ -183,6 +183,7 @@ function M.setup_lspconfig()
   vim.api.nvim_create_autocmd("LspAttach", {
     group = lsp_keys,
     callback = function(args)
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
       local opts = { buffer = args.buf }
       local builtin = require("telescope.builtin")
 
@@ -208,6 +209,207 @@ function M.setup_lspconfig()
       vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" }))
       vim.keymap.set("n", "<leader>le", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Show diagnostic error" }))
       vim.keymap.set("n", "<leader>lq", vim.diagnostic.setloclist, vim.tbl_extend("force", opts, { desc = "Open diagnostic list" }))
+
+      -- ── Go Struct Tags (gopls interactive refactoring) ───────────────────
+      if client and client.name == "gopls" then
+        local function modify_go_struct_tags()
+          local mode = vim.fn.mode()
+          local range
+          if mode:match("[vV\22]") then
+            vim.cmd([[execute "normal! \<ESC>"]])
+            local s = vim.fn.getpos("'<")
+            local e = vim.fn.getpos("'>")
+            range = {
+              start = { line = s[2] - 1, character = math.max(0, s[3] - 1) },
+              ["end"] = { line = e[2] - 1, character = math.max(0, e[3]) },
+            }
+          else
+            local cur = vim.api.nvim_win_get_cursor(0)
+            range = {
+              start = { line = cur[1] - 1, character = cur[2] },
+              ["end"] = { line = cur[1] - 1, character = cur[2] },
+            }
+          end
+
+          local tag_options = {
+            { label = "json",                  tag = "json",      options = "" },
+            { label = "json (omitempty)",       tag = "json",      options = "json=omitempty" },
+            { label = "yaml",                  tag = "yaml",      options = "" },
+            { label = "yaml (omitempty)",       tag = "yaml",      options = "yaml=omitempty" },
+            { label = "db",                    tag = "db",        options = "" },
+            { label = "xml",                   tag = "xml",       options = "" },
+            { label = "json,yaml",             tag = "json,yaml", options = "" },
+            { label = "Custom tag...",         tag = "custom" },
+            { label = "── Remove tag ──",       action = "remove" },
+            { label = "── Clear all tags ──",   action = "clear" },
+          }
+
+          local casing_options = {
+            { label = "camelCase   (e.g. firstName)",  val = "camelcase" },
+            { label = "PascalCase  (e.g. FirstName)",  val = "pascalcase" },
+            { label = "snake_case  (e.g. first_name)", val = "snakecase" },
+            { label = "kebab-case  (e.g. first-name)", val = "lispcase" },
+            { label = "keep        (original casing)", val = "keep" },
+          }
+
+          local function apply_modification(tag, options, transform)
+            client:exec_cmd({
+              command = "gopls.modify_tags",
+              arguments = { {
+                Modification = "add",
+                Add = tag,
+                AddOptions = options or "",
+                Transform = transform,
+                URI = vim.uri_from_bufnr(args.buf),
+                Range = range,
+              } },
+            }, { bufnr = args.buf }, function(err)
+              if err then
+                vim.notify("gopls struct tags error: " .. (err.message or vim.inspect(err)), vim.log.levels.ERROR)
+              else
+                vim.notify("Updated struct tags: " .. tag .. " (" .. transform .. ")", vim.log.levels.INFO)
+              end
+            end)
+          end
+
+          vim.ui.select(tag_options, {
+            prompt = "Select Struct Tag:",
+            format_item = function(item) return item.label end,
+          }, function(selected_tag)
+            if not selected_tag then return end
+
+            if selected_tag.action == "clear" then
+              client:exec_cmd({
+                command = "gopls.modify_tags",
+                arguments = { {
+                  Modification = "clear",
+                  Clear = true,
+                  URI = vim.uri_from_bufnr(args.buf),
+                  Range = range,
+                } },
+              }, { bufnr = args.buf }, function(err)
+                if err then
+                  vim.notify("gopls struct tags error: " .. (err.message or vim.inspect(err)), vim.log.levels.ERROR)
+                else
+                  vim.notify("Cleared struct tags", vim.log.levels.INFO)
+                end
+              end)
+              return
+            end
+
+            if selected_tag.action == "remove" then
+              vim.ui.input({ prompt = "Tag to remove (e.g. json): ", default = "json" }, function(tag_to_remove)
+                if not tag_to_remove or tag_to_remove == "" then return end
+                client:exec_cmd({
+                  command = "gopls.modify_tags",
+                  arguments = { {
+                    Modification = "remove",
+                    Remove = tag_to_remove,
+                    URI = vim.uri_from_bufnr(args.buf),
+                    Range = range,
+                  } },
+                }, { bufnr = args.buf }, function(err)
+                  if err then
+                    vim.notify("gopls struct tags error: " .. (err.message or vim.inspect(err)), vim.log.levels.ERROR)
+                  else
+                    vim.notify("Removed struct tag: " .. tag_to_remove, vim.log.levels.INFO)
+                  end
+                end)
+              end)
+              return
+            end
+
+            local tag = selected_tag.tag
+            local options = selected_tag.options or ""
+
+            local function prompt_casing(tag_name, tag_opts)
+              vim.ui.select(casing_options, {
+                prompt = "Select Casing (" .. tag_name .. "):",
+                format_item = function(item) return item.label end,
+              }, function(selected_casing)
+                if not selected_casing then return end
+                apply_modification(tag_name, tag_opts, selected_casing.val)
+              end)
+            end
+
+            if tag == "custom" then
+              vim.ui.input({ prompt = "Custom tag name: " }, function(custom_tag)
+                if not custom_tag or custom_tag == "" then return end
+                prompt_casing(custom_tag, "")
+              end)
+            else
+              prompt_casing(tag, options)
+            end
+          end)
+        end
+
+        vim.keymap.set({ "n", "v" }, "<leader>lt", modify_go_struct_tags, vim.tbl_extend("force", opts, { desc = "Go Struct Tags (interactive)" }))
+
+        vim.api.nvim_buf_create_user_command(args.buf, "GoAddTags", function(cmd_opts)
+          local tag = (cmd_opts.args ~= "") and cmd_opts.args or "json"
+          local cur_range
+          if cmd_opts.range == 2 then
+            cur_range = {
+              start = { line = cmd_opts.line1 - 1, character = 0 },
+              ["end"] = { line = cmd_opts.line2, character = 0 },
+            }
+          else
+            local cur = vim.api.nvim_win_get_cursor(0)
+            cur_range = {
+              start = { line = cur[1] - 1, character = cur[2] },
+              ["end"] = { line = cur[1] - 1, character = cur[2] },
+            }
+          end
+          client:exec_cmd({
+            command = "gopls.modify_tags",
+            arguments = { {
+              Modification = "add",
+              Add = tag,
+              Transform = "snakecase",
+              URI = vim.uri_from_bufnr(args.buf),
+              Range = cur_range,
+            } },
+          }, { bufnr = args.buf }, function(err)
+            if err then
+              vim.notify("gopls struct tags error: " .. (err.message or vim.inspect(err)), vim.log.levels.ERROR)
+            else
+              vim.notify("Added struct tag: " .. tag, vim.log.levels.INFO)
+            end
+          end)
+        end, { range = true, nargs = "?" })
+
+        vim.api.nvim_buf_create_user_command(args.buf, "GoRemoveTags", function(cmd_opts)
+          local tag = (cmd_opts.args ~= "") and cmd_opts.args or "json"
+          local cur_range
+          if cmd_opts.range == 2 then
+            cur_range = {
+              start = { line = cmd_opts.line1 - 1, character = 0 },
+              ["end"] = { line = cmd_opts.line2, character = 0 },
+            }
+          else
+            local cur = vim.api.nvim_win_get_cursor(0)
+            cur_range = {
+              start = { line = cur[1] - 1, character = cur[2] },
+              ["end"] = { line = cur[1] - 1, character = cur[2] },
+            }
+          end
+          client:exec_cmd({
+            command = "gopls.modify_tags",
+            arguments = { {
+              Modification = "remove",
+              Remove = tag,
+              URI = vim.uri_from_bufnr(args.buf),
+              Range = cur_range,
+            } },
+          }, { bufnr = args.buf }, function(err)
+            if err then
+              vim.notify("gopls struct tags error: " .. (err.message or vim.inspect(err)), vim.log.levels.ERROR)
+            else
+              vim.notify("Removed struct tag: " .. tag, vim.log.levels.INFO)
+            end
+          end)
+        end, { range = true, nargs = "?" })
+      end
     end,
   })
 

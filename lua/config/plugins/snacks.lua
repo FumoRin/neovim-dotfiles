@@ -2,6 +2,9 @@ local M = {}
 
 function M.setup()
   require("snacks").setup({
+    input = {
+      enabled = true,
+    },
     image = {
       enabled = true,
       doc = {

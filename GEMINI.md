@@ -223,6 +223,7 @@ Use this to track progress toward full IDE parity:
 | `<leader>ls` | Signature help documentation | Symbol / Call |
 | `<C-k>` | Toggle signature help float (Insert mode) | Insert |
 | `<leader>lc` | Code actions | Line/Selection |
+| `<leader>lt` | Interactive Go struct tags (gopls) | Struct / Selection |
 
 ### Git (gitsigns.nvim)
 | Key | Action | Scope |
