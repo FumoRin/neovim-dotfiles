@@ -66,8 +66,13 @@ function M.setup_mason()
 end
 
 function M.setup_mason_lspconfig()
+  -- Map tsc lspconfig name to mason package
+  local server_mappings = require("mason-lspconfig.mappings.server")
+  server_mappings.lspconfig_to_package["tsc"] = "tsc"
+  server_mappings.package_to_lspconfig["tsc"] = "tsc"
+
   require("mason-lspconfig").setup({
-    ensure_installed = { "lua_ls", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls", "svelte" },
+    ensure_installed = { "lua_ls", "tsc", "tsserver", "yamlls", "dockerls", "bashls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls", "svelte" },
     automatic_installation = true,
     automatic_enable = false,
   })
@@ -75,7 +80,7 @@ end
 
 function M.setup_lspconfig()
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
-  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "ts_ls", "tailwindcss", "ansiblels", "gopls", "astro", "cssls", "svelte" }
+  local servers = { "lua_ls", "bashls", "dockerls", "yamlls", "tsc", "tailwindcss", "ansiblels", "gopls", "astro", "cssls", "svelte" }
 
   if vim.lsp.handlers then
     if vim.lsp.handlers.hover then
